@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import {client_id, client_secret, redirect_uri} from '../constants'
 import './App.css'
 
 function api(){
