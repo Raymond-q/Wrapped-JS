@@ -1,39 +1,36 @@
 import { useState, useEffect } from 'react'
 import {client_id, client_secret, redirect_uri, auth_endpoint, response_type } from '../constants'
 import './App.css'
-
-function api(){
-  
-}
-
-function click(count, setCount, started, setStarted, time){
-  if (!started){
-    setStarted(true)
-    setTimeout(endTime(setStarted, count, setCount, time), time)
-  }
-  setCount(count + 1);
-}
-
-function reset(setCount){
-  setCount(0);
-}
-
-function endTime(setStarted, count, setCount, time){
-  setStarted(false)
-  let temp = count
-  setCount(0)
-  console.log(temp * 1000 / time)
-}
-
-const logout = () => {
-  setToken("")
-  window.localStorage.removeItem("token")
-}
+import axios from 'axios'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [started, setStarted] = useState(false)
   const [token, setToken] = useState("")
+  const [tracks, setTracks] = useState([])
+
+  const logout = () => {
+    setToken("")
+    console.log(token)
+    window.localStorage.removeItem("token")
+  }
+
+  const login = () => {
+    window.location.replace(auth_endpoint + `?client_id=${client_id}&response_type=code&redirect_uri=${redirect_uri}`)
+  }
+
+  async function topItems (type, range) {
+    const url = "https://api.spotify.com/v1/get/" + type
+    console.log(url)
+    const arr = await axios.get("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      }
+    )
+    console.log(arr)
+    /*if (type == "tracks"){
+      setTracks(arr.items())
+    }*/
+  }
 
   useEffect(() => {
     const hash = window.location.hash
@@ -53,16 +50,14 @@ function App() {
   return (
     <div className="App">
       <div className="card">
-        <button onClick={() => click(count, setCount, started, setStarted, 1000)}>
-          count is {count}
+        <button onClick={() => topItems("tracks", "medium_term")}>
+          Get tracks
         </button>
       </div>
-      <div className="card">
-        <button onClick={() => reset(setCount)}>
-          reset count
-        </button>
-      </div>
-      <a href={`${auth_endpoint}?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}`}>Login to Spotify</a>
+      {!token ?
+        <button onClick = {() => login()}>Login
+            to Spotify</button>
+        : <button onClick={logout}>Logout</button>}
     </div>
     
   )
